@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.IO;
-//using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 public class SaveManager : MonoBehaviour
 {
@@ -8,6 +8,9 @@ public class SaveManager : MonoBehaviour
     public SaveDataAsset debugStartData;
 
     private string Root => Application.persistentDataPath + "/";
+    public string SaveFileName = "save_data.quirstn";
+
+    public SaveData CurrentSave { get; private set; }
 
     void Start()
     {
@@ -15,14 +18,14 @@ public class SaveManager : MonoBehaviour
 
         if (debugStartData != null)
         {
-            data = debugStartData.ToSaveData();
+            CurrentSave = debugStartData.ToSaveData();
         }  
         else
         {
-            data = LoadGame();
-            if (data == null)
+            CurrentSave = LoadGame();
+            if (CurrentSave == null)
             {
-                data = new SaveData
+                CurrentSave = new SaveData
                 {
                     // setup defaults here
                     uuid = System.Guid.NewGuid().ToString() 
@@ -31,13 +34,20 @@ public class SaveManager : MonoBehaviour
         }
     } 
 
-    public void SaveGame(SaveData save)
+    public void SaveGame(SaveData data)
     {
-       //string json = JsonConvert
+       string path = Path.Combine(Root, SaveFileName);
+       
+       string json = JsonConvert.SerializeObject(data, Formatting.Indented);
+       File.WriteAllText(path, json);
     }
 
     public SaveData LoadGame()
     {
-        return null;
+        string path = Path.Combine(Root, SaveFileName);
+        if (!File.Exists(path)) return null;
+
+        string json = File.ReadAllText(path);
+        return JsonConvert.DeserializeObject<SaveData>(json);
     }
 }
