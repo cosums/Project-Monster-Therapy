@@ -14,6 +14,8 @@ public class SaveManager : MonoBehaviour
 
     public SaveData CurrentSave { get; private set; }
 
+    private bool _debugMode = false;
+
     public void Awake()
     {
         if (Instance == null)
@@ -32,6 +34,7 @@ public class SaveManager : MonoBehaviour
         if (debugStartData != null)
         {
             CurrentSave = debugStartData.ToSaveData();
+            _debugMode = true;
             Debug.Log("[SaveManager]: Loaded debug save data!");
         }  
         else
@@ -57,7 +60,12 @@ public class SaveManager : MonoBehaviour
 
     void OnDestroy()
     {
-        SaveGame(CurrentSave);
+        if (!_debugMode) SaveGame(CurrentSave); 
+        // to not override our saved games later on
+        // also this doesn't work with webgl i'm suddenly realizing, uhh
+
+        // so there are ways around this that forces unity to save these files to the browser cache
+        // im not doing this tonight though lmao, TODO HERE
     }
 
     private void Save() => SaveGame(CurrentSave);
